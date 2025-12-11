@@ -12,7 +12,8 @@
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
     "csv-parse": "^5.5.4",
-    "firebase-admin": "^11.10.1",
+    "csv-stringify": "^6.6.0",
+    "firebase-admin": "^13.6.0",
     "json2csv": "^6.0.0-alpha.2"
   },
   "devDependencies": {

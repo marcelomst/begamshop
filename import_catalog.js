@@ -13,7 +13,7 @@ admin.initializeApp({
 });
 const db = admin.firestore();
 
-const csvFilePath = path.join(__dirname, 'catalogo_exportado.csv');
+const csvFilePath = path.join(__dirname, 'catalogo_exportado_fixed2.csv');
 
 
 async function clearCatalogCollection() {
