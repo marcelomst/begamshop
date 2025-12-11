@@ -1,0 +1,414 @@
+<!--
+C:\Users\marce\Documents\BegamShop\tienda\index.html
+===================================================================
+ESTRUCTURA DE ARCHIVOS SUGERIDA PARA UN PROYECTO LOCAL
+===================================================================
+Tu idea de organizar localmente es la mejor. Así separarías este archivo:
+1. index.html: Solo el esqueleto HTML (lo que ves ahora).
+2. /js/main.js: Todo el código dentro de la etiqueta <script>.
+3. /data/catalog.js: La constante 'mockCatalog' con los datos de los productos.
+4. /assets/images/: Las imágenes del logo y los productos.
+===================================================================
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repuestos de Calidad | [Tu Tienda]</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+                        /* Modal producto: colores armónicos */
+                        #modal-product-name {
+                            color: #16a34a; /* verde Tailwind-600 */
+                        }
+                        #modal-product-description-title {
+                            color: #2563eb; /* azul Tailwind-600 */
+                            font-weight: bold;
+                        }
+                        #modal-product-price {
+                            color: #ea580c; /* naranja Tailwind-600 */
+                            font-weight: bold;
+                        }
+                /* Estilos para títulos en la descripción del producto */
+                #modal-product-description h4, #modal-product-description h3, #modal-product-description strong {
+                    color: #16a34a; /* verde Tailwind-600 */
+                    font-weight: bold;
+                    margin-top: 1em;
+                    margin-bottom: 0.5em;
+                }
+                #modal-product-description ul {
+                    list-style: disc inside;
+                    margin-bottom: 1em;
+                }
+                #modal-product-description li {
+                    margin-left: 1em;
+                }
+        /* --- BLOQUE DE ESTILOS (Simula /css/styles.css) --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+        .page-view {
+            display: none;
+        }
+        .page-view.active {
+            display: block;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 50;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- PERFIL DE EMPRESA -->
+    <div id="empresa-profile" class="max-w-md mx-auto my-8 space-y-4 bg-white p-6 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-bold mb-2 text-center">Perfil de la Empresa</h2>
+        <!-- Esta sección solo debe ser visible para administradores -->
+        <div class="flex flex-col items-center space-y-2">
+            <img id="empresa-logo-preview" src="assets/images/favicon.png" alt="Logo Empresa" class="h-16 w-16 rounded-full border-2 border-indigo-500 object-cover" />
+            <input type="file" id="empresa-logo" accept="image/*" class="w-full" />
+        </div>
+        <div class="flex flex-col items-center space-y-2 mt-2">
+            <img id="empresa-cover-preview" src="assets/images/favicon.png" alt="Portada Empresa" class="h-24 w-full object-cover rounded-lg border border-indigo-300" />
+            <input type="file" id="empresa-cover" accept="image/*" class="w-full" />
+        </div>
+        <input type="text" id="empresa-nombre" placeholder="Nombre de la empresa" class="w-full px-4 py-2 border rounded-lg">
+        <input type="text" id="empresa-slogan" placeholder="Slogan corto (ej: Tu repuesto seguro)" class="w-full px-4 py-2 border rounded-lg">
+        <textarea id="empresa-descripcion" placeholder="Descripción larga o institucional" class="w-full px-4 py-2 border rounded-lg" rows="3"></textarea>
+        <input type="text" id="empresa-direccion" placeholder="Dirección" class="w-full px-4 py-2 border rounded-lg">
+        <input type="text" id="empresa-telefono" placeholder="Teléfono" class="w-full px-4 py-2 border rounded-lg">
+        <input type="text" id="empresa-email" placeholder="Email" class="w-full px-4 py-2 border rounded-lg">
+                <!-- Moneda por defecto de la tienda -->
+                <label for="empresa-currency" class="block text-sm font-medium text-gray-700">Moneda por defecto</label>
+                <select id="empresa-currency" class="w-full px-4 py-2 border rounded-lg bg-white">
+                        <option value="USD">USD — Dólar estadounidense</option>
+                        <option value="UYU">UYU — Peso uruguayo</option>
+                        <option value="ARS">ARS — Peso argentino</option>
+                        <option value="BRL">BRL — Real brasileño</option>
+                        <option value="EUR">EUR — Euro</option>
+                    </select>
+        <input type="text" id="empresa-facebook" placeholder="Facebook (URL o usuario)" class="w-full px-4 py-2 border rounded-lg">
+        <input type="text" id="empresa-instagram" placeholder="Instagram (URL o usuario)" class="w-full px-4 py-2 border rounded-lg">
+        <input type="text" id="empresa-whatsapp" placeholder="WhatsApp (número internacional)" class="w-full px-4 py-2 border rounded-lg">
+        <input type="text" id="empresa-web" placeholder="Sitio web" class="w-full px-4 py-2 border rounded-lg">
+        <button id="empresa-guardar" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg">Guardar Perfil Empresa</button>
+        <div id="empresa-msg" class="text-center text-green-600 font-semibold"></div>
+    </div>
+
+    <!-- CABECERA Y NAVEGACIÓN -->
+    <header class="bg-indigo-700 shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            
+            <!-- LOGO Y NOMBRE DE LA TIENDA (TU "LUGARCITO") -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="navigate('home')">
+                <!-- Logo principal -->
+                <img id="header-empresa-logo" src="assets/images/favicon.png" 
+                     alt="Logo Empresa" 
+                     class="h-10 w-10 rounded-full bg-yellow-300 p-1 shadow-inner"
+                     onerror="this.onerror=null; this.src='assets/images/logo-fallback.png';">
+                <h1 id="header-empresa-nombre" class="text-2xl font-bold text-white"></h1>
+                <span id="header-currency-badge" class="ml-2 px-2 py-0.5 text-xs font-semibold bg-white text-indigo-700 rounded-full border border-indigo-600"></span>
+            </div>
+            
+            <!-- Menú de Navegación -->
+            <nav class="flex items-center space-x-6">
+                <a href="#" onclick="navigate('home')" class="text-white hover:text-yellow-300 transition duration-150 font-medium">Inicio</a>
+                <a href="#" onclick="navigate('catalog')" class="text-white hover:text-yellow-300 transition duration-150 font-medium">Tienda</a>
+                <!-- Botones de autenticación y avatar -->
+                <button id="header-login-btn" class="text-white bg-indigo-600 hover:bg-indigo-500 font-medium px-3 py-1 rounded-lg transition duration-150">Ingresar</button>
+                <button id="header-register-btn" class="text-white bg-green-600 hover:bg-green-500 font-medium px-3 py-1 rounded-lg transition duration-150">Registrarse</button>
+                <button id="header-user-btn" class="hidden relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 border-2 border-indigo-600 overflow-hidden" title="Perfil">
+                    <img id="header-user-avatar" src="assets/images/favicon.png" alt="Usuario" class="w-full h-full object-cover" />
+                    <span id="header-user-initials" class="absolute text-indigo-700 font-bold text-lg"></span>
+                </button>
+                <!-- Icono de Carrito -->
+                <button onclick="navigate('checkout')" class="relative p-2 rounded-full bg-indigo-600 hover:bg-indigo-500 transition duration-150">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <span id="cart-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+
+    <!-- AUTENTICACIÓN: LOGIN, REGISTRO Y PERFIL -->
+    <div id="auth-views" class="max-w-md mx-auto my-8 space-y-8">
+        <!-- Login -->
+        <form id="login-form" class="bg-white p-6 rounded-xl shadow-lg space-y-4 hidden">
+            <h2 class="text-2xl font-bold mb-2 text-center">Ingresar</h2>
+            <input type="email" id="login-email" placeholder="Correo electrónico" required class="w-full px-4 py-2 border rounded-lg">
+            <input type="password" id="login-password" placeholder="Contraseña" required class="w-full px-4 py-2 border rounded-lg">
+            <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg">Ingresar</button>
+            <p class="text-center text-sm">¿No tienes cuenta? <a href="#" id="show-register" class="text-indigo-600 hover:underline">Regístrate</a></p>
+        </form>
+        <!-- Registro -->
+        <form id="register-form" class="bg-white p-6 rounded-xl shadow-lg space-y-4 hidden">
+            <h2 class="text-2xl font-bold mb-2 text-center">Registrarse</h2>
+            <input type="email" id="register-email" placeholder="Correo electrónico" required class="w-full px-4 py-2 border rounded-lg">
+            <input type="password" id="register-password" placeholder="Contraseña" required class="w-full px-4 py-2 border rounded-lg">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="register-name" placeholder="Nombre" required class="w-full px-4 py-2 border rounded-lg">
+                <input type="text" id="register-surname" placeholder="Apellido" required class="w-full px-4 py-2 border rounded-lg">
+            </div>
+            <input type="tel" id="register-phone" placeholder="Teléfono" class="w-full px-4 py-2 border rounded-lg">
+            <input type="text" id="register-country" placeholder="País" class="w-full px-4 py-2 border rounded-lg">
+            <input type="text" id="register-province" placeholder="Provincia" class="w-full px-4 py-2 border rounded-lg">
+            <input type="text" id="register-city" placeholder="Ciudad" class="w-full px-4 py-2 border rounded-lg">
+            <input type="text" id="register-address" placeholder="Dirección" required class="w-full px-4 py-2 border rounded-lg">
+            <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 rounded-lg">Registrarse</button>
+            <p class="text-center text-sm">¿Ya tienes cuenta? <a href="#" id="show-login" class="text-indigo-600 hover:underline">Ingresar</a></p>
+        </form>
+        <!-- Perfil -->
+        <form id="profile-form" class="bg-white p-6 rounded-xl shadow-lg space-y-4 hidden">
+            <h2 class="text-2xl font-bold mb-2 text-center">Perfil de Usuario</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="profile-name" placeholder="Nombre" required class="w-full px-4 py-2 border rounded-lg">
+                <input type="text" id="profile-surname" placeholder="Apellido" required class="w-full px-4 py-2 border rounded-lg">
+            </div>
+            <input type="email" id="profile-email" disabled class="w-full px-4 py-2 border rounded-lg bg-gray-100">
+            <input type="tel" id="profile-phone" placeholder="Teléfono" class="w-full px-4 py-2 border rounded-lg">
+            <input type="text" id="profile-country" placeholder="País" class="w-full px-4 py-2 border rounded-lg">
+            <input type="text" id="profile-province" placeholder="Provincia" class="w-full px-4 py-2 border rounded-lg">
+            <input type="text" id="profile-city" placeholder="Ciudad" class="w-full px-4 py-2 border rounded-lg">
+            <input type="text" id="profile-address" placeholder="Dirección" required class="w-full px-4 py-2 border rounded-lg">
+            <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg">Actualizar perfil</button>
+            <button type="button" id="logout-btn" class="w-full bg-red-500 text-white font-bold py-2 rounded-lg">Cerrar sesión</button>
+        </form>
+        <div id="auth-message" class="text-center text-red-600 font-semibold"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- VISTAS DE LA APLICACIÓN -->
+        <section id="home-view" class="page-view active">
+            <!-- Bloque dinámico de perfil de empresa -->
+            <div id="empresa-home-block" class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center bg-white p-8 rounded-2xl shadow-xl mb-12">
+                <div class="order-2 lg:order-1">
+                    <h2 id="home-empresa-nombre" class="text-5xl font-extrabold text-gray-900 mb-2 leading-tight"></h2>
+                    <h3 id="home-empresa-slogan" class="text-2xl font-semibold text-indigo-600 mb-4"></h3>
+                    <p id="home-empresa-descripcion" class="text-lg text-gray-600 mb-6"></p>
+                    <div class="flex flex-col space-y-1 mb-4">
+                        <span id="home-empresa-direccion" class="text-sm text-gray-500"></span>
+                        <span id="home-empresa-telefono" class="text-sm text-gray-500"></span>
+                        <span id="home-empresa-email" class="text-sm text-gray-500"></span>
+                    </div>
+                    <div class="flex space-x-3 mb-4">
+                        <a id="home-empresa-facebook" href="#" target="_blank" class="text-blue-600 hover:underline hidden"><i class="fab fa-facebook"></i> Facebook</a>
+                        <a id="home-empresa-instagram" href="#" target="_blank" class="text-pink-500 hover:underline hidden"><i class="fab fa-instagram"></i> Instagram</a>
+                        <a id="home-empresa-whatsapp" href="#" target="_blank" class="text-green-600 hover:underline hidden"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                        <a id="home-empresa-web" href="#" target="_blank" class="text-indigo-700 hover:underline hidden"><i class="fas fa-globe"></i> Web</a>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="navigate('catalog')" class="bg-indigo-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
+                            Explorar Catálogo Ahora
+                        </button>
+                        <button onclick="navigate('checkout')" class="bg-gray-200 text-gray-800 font-semibold py-3 px-8 rounded-full hover:bg-gray-300 transition duration-300">
+                            Mi Carrito
+                        </button>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2 flex flex-col items-center">
+                    <img id="home-empresa-cover" src="assets/images/favicon.png" alt="Portada Empresa" class="rounded-xl shadow-2xl w-full h-48 object-cover mb-4">
+                    <img id="home-empresa-logo" src="assets/images/favicon.png" alt="Logo Empresa" class="h-20 w-20 rounded-full border-2 border-indigo-500 object-cover bg-white -mt-10 shadow-lg">
+                    <span id="home-currency-badge" class="mt-2 px-2 py-0.5 text-xs font-semibold bg-white text-indigo-700 rounded-full border border-indigo-600"></span>
+                </div>
+            </div>
+
+            <!-- Sección de Beneficios -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-indigo-100">
+                    <div class="text-indigo-600 text-4xl mb-3">🛠️</div>
+                    <h3 class="font-bold text-lg mb-2">Detalles Precisos</h3>
+                    <p class="text-sm text-gray-600">Fotos de alta resolución y medidas exactas para asegurar la compatibilidad.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-indigo-100">
+                    <div class="text-indigo-600 text-4xl mb-3">📦</div>
+                    <h3 class="font-bold text-lg mb-2">Envío Rápido</h3>
+                    <p class="text-sm text-gray-600">Procesamos tu pedido en menos de 24 horas.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-indigo-100">
+                    <div class="text-indigo-600 text-4xl mb-3">🔒</div>
+                    <h3 class="font-bold text-lg mb-2">Compra Segura</h3>
+                    <p class="text-sm text-gray-600">Tus datos personales y de pago están protegidos.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 2: CATÁLOGO (TIENDA) -->
+        <section id="catalog-view" class="page-view">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Nuestro Catálogo de Repuestos</h2>
+            <div id="product-catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Los productos del catálogo se insertarán aquí -->
+            </div>
+        </section>
+
+
+        <!-- VISTA 3: CHECKOUT (CARRITO Y FORMULARIO) -->
+        <section id="checkout-view" class="page-view">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <main class="lg:col-span-2">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Finalizar Pedido</h2>
+
+                    <!-- Sección del Carrito de Compras -->
+                    <section id="cart-section" class="bg-white p-6 rounded-xl shadow-lg mb-6">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4 flex justify-between items-center">
+                            Artículos en tu Carrito
+                            <button id="clear-cart-btn" class="text-sm text-red-500 hover:text-red-700 transition duration-150">Vaciar Carrito</button>
+                        </h3>
+                        <div id="cart-items" class="space-y-4">
+                            <p class="text-gray-500 italic" id="empty-cart-message">El carrito está vacío. Añade productos desde la Tienda.</p>
+                        </div>
+                    </section>
+
+                    <!-- Sección de Datos del Cliente y Envío -->
+                    <section id="checkout-section" class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Datos de Envío y Contacto</h3>
+                        <form id="checkout-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+                                    <input type="text" id="nombre" name="nombre" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label for="apellido" class="block text-sm font-medium text-gray-700">Apellido</label>
+                                    <input type="text" id="apellido" name="apellido" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                                    <input type="email" id="email" name="email" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
+                                    <input type="tel" id="telefono" name="telefono" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="pais" class="block text-sm font-medium text-gray-700">País</label>
+                                    <input type="text" id="pais" name="pais" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label for="provincia" class="block text-sm font-medium text-gray-700">Provincia</label>
+                                    <input type="text" id="provincia" name="provincia" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label for="ciudad" class="block text-sm font-medium text-gray-700">Ciudad</label>
+                                    <input type="text" id="ciudad" name="ciudad" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="direccion" class="block text-sm font-medium text-gray-700">Dirección</label>
+                                <input type="text" id="direccion" name="direccion" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <button type="submit" id="submit-button" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition duration-200 shadow-md disabled:bg-indigo-400 disabled:cursor-not-allowed">
+                                Confirmar Pedido ($<span id="final-total">0.00</span>)
+                            </button>
+                            <div id="message-area" class="mt-4 p-3 rounded-lg text-center hidden"></div>
+                        </form>
+                    </section>
+                </main>
+
+                <!-- Columna Lateral: Resumen del Pedido -->
+                <aside class="lg:col-span-1">
+                    <div class="sticky top-20 bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Resumen del Pago</h3>
+                        <div class="space-y-2 text-gray-600">
+                            <div class="flex justify-between border-b pb-1">
+                                <span>Subtotal:</span>
+                                <span>$<span id="subtotal">0.00</span></span>
+                            </div>
+                            <div class="flex justify-between border-b pb-1">
+                                <span>Costo de Envío:</span>
+                                <span>$<span id="shipping-cost">0.00</span></span>
+                            </div>
+                            <div class="flex justify-between pt-2 text-lg font-bold text-gray-800">
+                                <span>Total Final:</span>
+                                <span>$<span id="total">0.00</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- CONFIRMACIÓN DE PEDIDO -->
+    <div id="confirmation-view" class="page-view max-w-2xl mx-auto my-12 bg-white p-6 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-bold text-green-700 mb-4">¡Pedido confirmado!</h2>
+        <p class="text-sm text-gray-600 mb-2">Guarda esta referencia:</p>
+        <p id="confirm-order-id" class="font-mono text-lg bg-gray-100 px-3 py-2 rounded border mb-4"></p>
+        <div id="confirm-summary" class="space-y-2"></div>
+        <div class="mt-6 flex gap-3">
+            <button onclick="navigate('catalog')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">Seguir comprando</button>
+            <button onclick="navigate('home')" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">Ir al inicio</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE DETALLES DEL PRODUCTO -->
+    <div id="product-modal" class="modal-overlay">
+        <div class="modal-content w-full lg:w-3/4 xl:w-2/3">
+            <div class="flex justify-end p-4 bg-white rounded-t-xl">
+                <button onclick="hideProductModal()" class="text-gray-500 hover:text-gray-900 transition duration-150">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div id="modal-body" class="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6 bg-white">
+                <div class="lg:col-span-2">
+                    <h2 id="modal-product-name" class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2"></h2>
+                    <div class="mb-4 aspect-square rounded-xl overflow-hidden shadow-lg bg-gray-100 flex items-center justify-center">
+                        <img id="main-product-image" src="" alt="Vista principal del producto" class="w-full h-full object-cover">
+                    </div>
+                    <div id="thumbnail-gallery" class="grid grid-cols-4 gap-3">
+                        <!-- Miniaturas aquí -->
+                    </div>
+                </div>
+
+                <div class="lg:col-span-1 flex flex-col">
+                    <div class="flex-grow">
+                        <h3 id="modal-product-description-title" class="text-xl font-semibold text-blue-600 mb-3">Descripción Completa</h3>
+                        <p id="modal-product-description" class="text-gray-600 text-sm leading-relaxed mb-6"></p>
+
+                        <div class="bg-gray-50 p-4 rounded-lg border mb-6">
+                            <p class="text-lg font-bold text-gray-800 mb-1">Precio: <span id="modal-product-price">0.00</span></p>
+                            <p class="text-sm text-gray-500">Stock disponible: <span id="modal-product-stock">0</span> unidades</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón de Acción (Añadir al Carrito) -->
+                    <button id="modal-add-to-cart-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-200 shadow-md flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        Añadir 1 al Carrito
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- FIN MODAL DE DETALLES DEL PRODUCTO -->
+
+
+    <script type="module" src="js/main.js?v=2025-12-05-1"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "functions": {
+    "source": "functions"
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "emulators": {
+    "functions": {
+      "port": 5003,
+      "host": "127.0.0.1"
+    },
+    "firestore": {
+      "port": 8085,
+      "host": "0.0.0.0"
+    },
+    "hosting": {
+      "port": 5010,
+      "host": "0.0.0.0"
+    },
+    "storage": {
+      "port": 9205,
+      "host": "0.0.0.0"
+    },
+    "auth": {
+      "port": 9099,
+      "host": "0.0.0.0"
+    },
+    "ui": {
+      "enabled": true,
+      "port": 5520,
+      "host": "127.0.0.1"
+    },
+    "hub": {
+      "port": 5510,
+      "host": "127.0.0.1"
+    },
+    "logging": {
+      "port": 5530,
+      "host": "127.0.0.1"
+    },
+    "singleProjectMode": true
+  }
+}

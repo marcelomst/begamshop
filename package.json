@@ -1,0 +1,23 @@
+{
+  "name": "begamshop-import-catalog",
+  "version": "1.0.0",
+  "description": "Script para importar catálogo a Firestore desde CSV",
+  "main": "import_catalog.js",
+  "type": "commonjs",
+  "scripts": {
+    "import-catalog": "node import_catalog.js",
+    "import-images": "node import_images_to_firestore.js",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
+    "csv-parse": "^5.5.4",
+    "firebase-admin": "^11.10.1",
+    "json2csv": "^6.0.0-alpha.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.1",
+    "globals": "^15.9.0",
+    "vitest": "^4.0.15"
+  }
+}

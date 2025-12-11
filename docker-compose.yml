@@ -1,0 +1,91 @@
+services:
+  emulators:
+    build: ./docker
+    container_name: begamshop-emulators
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    # Map common emulator ports to host
+    ports:
+      - "5010:5010"   # Hosting
+      - "9099:9099"   # Auth
+      - "8085:8085"   # Firestore
+      - "9150:9150"   # Firestore WS
+      - "5003:5003"   # Functions
+      - "4020:4020"   # Emulator UI
+      - "5520:5520"   # Emulator UI (autoasignado)
+      - "4410:4410"   # Hub
+      - "4510:4510"   # Logging
+    environment:
+      # Ensure consistent locale/timezone if needed
+      - TZ=America/Argentina/Buenos_Aires
+      # SendGrid: set via .env or your shell; required for real emails
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - SENDGRID_FROM=${SENDGRID_FROM:-begamshop.ventas@gmail.com}
+      - SENDGRID_SANDBOX=${SENDGRID_SANDBOX:-false}
+    # Use the firebase.json in the mounted workspace
+    command: ["firebase", "emulators:start", "--only", "hosting,auth,firestore,functions", "--import", "/workspace/emulator-data", "--export-on-exit", "/workspace/emulator-data"]
+    profiles:
+      - dev
+  web:
+    image: nginx:stable-alpine
+    container_name: begamshop-web
+    depends_on:
+      - emulators
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8080:80"
+    environment:
+      - TZ=America/Argentina/Buenos_Aires
+    profiles:
+      - dev
+  seed:
+    image: node:20-bookworm
+    container_name: begamshop-seed
+    depends_on:
+      - emulators
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    environment:
+      - FIRESTORE_EMULATOR_HOST=emulators:8085
+      - GOOGLE_CLOUD_PROJECT=begamshop-4b22b
+      - TZ=America/Argentina/Buenos_Aires
+    command: ["bash", "-lc", "while ! echo > /dev/tcp/emulators/8085; do sleep 1; done; node import_catalog.js"]
+    profiles:
+      - seed
+  seed-images:
+    image: node:20-bookworm
+    container_name: begamshop-seed-images
+    depends_on:
+      - emulators
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    environment:
+      - FIRESTORE_EMULATOR_HOST=emulators:8085
+      - GOOGLE_CLOUD_PROJECT=begamshop-4b22b
+      - TZ=America/Argentina/Buenos_Aires
+    command: ["bash", "-lc", "while ! echo > /dev/tcp/emulators/8085; do sleep 1; done; node import_images_to_firestore.js"]
+    profiles:
+      - seed
+
+  clone-prod:
+    image: node:20-bookworm
+    container_name: begamshop-clone-prod
+    depends_on:
+      - emulators
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    environment:
+      - GOOGLE_CLOUD_PROJECT=begamshop-4b22b
+      - TZ=America/Argentina/Buenos_Aires
+      # NO seteamos FIRESTORE_EMULATOR_HOST aquí para permitir conexión a PROD
+      - EMU_HOST=emulators:8085
+    command: ["bash", "-lc", "node tools/sync_prod_to_emulator.js"]
+    profiles:
+      - seed
